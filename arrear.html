@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>বকেয়া বিল বিবরণী — জাতীয় বেতন স্কেল ২০২৬</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #5f6b7a;
+    --line: #d5dae1;
+    --bg: #e7eaee;
+    --panel: #ffffff;
+    --accent: #0f6b4f;
+    --accent-soft: #e5f2ed;
+    --warn: #a15c00;
+    --warn-soft: #fff4e0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans Bengali', 'Noto Serif Bengali', sans-serif;
+    font-size: 15px;
+  }
+
+  /* ---------- App layout ---------- */
+  .app { display: grid; grid-template-columns: minmax(340px, 460px) 1fr; height: 100vh; }
+  .panel { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; }
+  .toolbar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--panel); border-bottom: 1px solid var(--line);
+    padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .toolbar h1 { flex-basis: 100%; margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+  .btn {
+    font: inherit; font-size: 14px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 12px; cursor: pointer; background: #fff; color: var(--ink);
+  }
+  a.btn { display: inline-block; text-decoration: none; }
+  .btn:hover { background: #f3f5f7; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #0b5740; }
+  .btn.danger { color: #b42318; border-color: #f1c4bf; }
+  .btn.danger:hover { background: #fdf0ee; }
+  .msg { flex-basis: 100%; font-size: 12.5px; color: var(--accent); }
+  .msg.err { color: #b42318; }
+  .msg:empty { display: none; }
+
+  .form { padding: 12px 16px 40px; }
+  fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 14px; padding: 10px 12px 4px; }
+  legend { font-weight: 700; font-size: 14px; padding: 0 6px; color: var(--accent); }
+  .field { margin-bottom: 10px; }
+  .field > label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+  .field .hint { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .sub { font-size: 11.5px; color: var(--muted); display: block; margin-bottom: 2px; }
+  input[type=text], select {
+    width: 100%; font: inherit; font-size: 14.5px; padding: 6px 8px;
+    border: 1px solid #c3cad3; border-radius: 5px; background: #fff; color: var(--ink);
+  }
+  input[type=text]:focus, select:focus { outline: 2px solid #8cc7b1; border-color: var(--accent); }
+  input.money { text-align: right; }
+  .warn-msg {
+    display: block; margin-top: 3px; font-size: 12px; color: var(--warn);
+    background: var(--warn-soft); border-radius: 4px; padding: 3px 6px;
+  }
+  .warn-msg:empty { display: none; }
+
+  /* ---------- Preview ---------- */
+  .preview { overflow: auto; padding: 24px; display: flex; justify-content: center; align-items: flex-start; }
+  .sheet-wrap { position: relative; }
+  .sheet {
+    width: 210mm; height: 297mm; padding: 12mm;
+    background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.22);
+    transform-origin: top left; overflow: hidden; color: #1a1a1a;
+    font-family: 'Noto Serif Bengali', serif;
+  }
+  .sheet.overflow { outline: 3px solid #d92d20; }
+  .sheet-inner { --fs: 10.5pt; font-size: var(--fs); line-height: 1.35; height: 271mm; overflow: hidden; }
+
+  .doc-title { text-align: center; font-size: 1.55em; font-weight: 700; margin: 0 0 1.5mm; }
+  .info {
+    text-align: center; font-size: 0.95em;
+    border-bottom: 1.5px solid var(--accent); padding-bottom: 1.5mm; margin-bottom: 3mm;
+  }
+  .info b { font-weight: 700; }
+  .info .sep { color: #888; padding: 0 1.2mm; }
+  .summary {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid #b9d3c6; background: #eef5f1; border-radius: 1.5mm;
+    padding: 2mm 3.5mm; margin-bottom: 3mm;
+  }
+  .summary .s-label { font-weight: 700; }
+  .summary .s-range { font-size: 0.8em; color: #555; }
+  .summary .s-amt { font-size: 1.6em; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  h3.sec { color: var(--accent); font-size: 1.1em; font-weight: 700; margin: 3mm 0 1.2mm; }
+  .steps { margin: 0; padding-left: 6mm; font-size: 0.92em; }
+  .steps li { margin-bottom: 0.6mm; }
+  .steps b { font-weight: 700; }
+  .steps .note { color: #b42318; }
+  .cap { font-weight: 700; font-size: 0.92em; margin: 1.2mm 0 0.8mm; }
+  table.grid { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+  .grid th, .grid td { border: 1px solid #bdbdbd; padding: 0.7mm 2mm; vertical-align: top; }
+  .grid th { background: #efefef; font-weight: 700; text-align: left; }
+  .grid th.num, .grid td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .grid td .small { display: block; font-size: 0.82em; color: #666; }
+  .grid tr.total td { background: #efefef; font-weight: 700; }
+  .neg { color: #c0392b; }
+  table.grid.months { width: 60%; }
+  table.grid.months.two { width: 100%; }
+  .grand { text-align: right; font-weight: 700; margin-top: 2mm; }
+  .signs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8mm; margin-top: 16mm; font-size: 0.9em; text-align: center; }
+  .signs div { border-top: 1px solid #999; padding-top: 1mm; }
+  .prep { font-size: 0.8em; color: #555; margin-top: 2mm; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; height: auto; }
+    .panel { border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+    .preview { padding: 16px; }
+  }
+
+  /* ---------- Print ---------- */
+  @page { size: A4 portrait; margin: 12mm; }
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { background: #fff !important; height: auto; }
+    .panel { display: none !important; }
+    .app { display: block; height: auto; }
+    .preview { display: block; padding: 0; overflow: visible; }
+    .sheet-wrap { width: auto !important; height: auto !important; }
+    .sheet {
+      width: 186mm; max-width: 100%; height: auto; padding: 0; margin: 0 auto;
+      box-shadow: none; outline: none !important; transform: none !important;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===================== INPUT FORM ===================== -->
+  <aside class="panel">
+    <div class="toolbar">
+      <h1>বকেয়া বিল বিবরণী — জাতীয় বেতন স্কেল ২০২৬</h1>
+      <button type="button" class="btn primary" id="btnPrint">প্রিন্ট করুন</button>
+      <button type="button" class="btn" id="btnImport" title="বেতন নির্ধারণী বিবরণীতে এখন যে কর্মকর্তা/কর্মচারীর তথ্য আছে তা আনুন">বেতন নির্ধারণী থেকে তথ্য আনুন</button>
+      <a class="btn" href="index.html">বেতন নির্ধারণী বিবরণী</a>
+      <button type="button" class="btn danger" id="btnClear">সব মুছুন</button>
+      <span class="msg" id="msg"></span>
+    </div>
+
+    <form class="form" id="form" autocomplete="off" onsubmit="return false">
+      <fieldset>
+        <legend>কর্মকর্তা/কর্মচারীর তথ্য</legend>
+        <div class="field">
+          <div class="row2">
+            <div><span class="sub">নাম</span><input type="text" data-key="name"></div>
+            <div><span class="sub">পদবি</span><input type="text" data-key="desig"></div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="row2">
+            <div><span class="sub">অফিস</span><input type="text" data-key="office"></div>
+            <div><span class="sub">এনআইডি</span><input type="text" data-key="nid" inputmode="numeric"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="grade">বেতন গ্রেড</label>
+          <select id="grade" data-key="grade"></select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>বেতন (টাকা)</legend>
+        <div class="field">
+          <label for="b7">৩০ জুন ২০২৬ তারিখে মূল বেতন (২০১৫ স্কেল)</label>
+          <input type="text" class="money" id="b7" data-key="b7" inputmode="decimal" list="steps2015">
+          <datalist id="steps2015"></datalist>
+          <span class="warn-msg" id="warnB7"></span>
+        </div>
+        <div class="field">
+          <label for="drawn">বকেয়ার মাসগুলোতে গৃহীত (তোলা) মূল বেতন</label>
+          <input type="text" class="money" id="drawn" data-key="drawn" inputmode="decimal">
+          <span class="hint">খালি রাখলে ২০১৫ স্কেলের পরের ধাপ ধরা হবে (পুরাতন স্কেলে ১ জুলাই ২০২৬-এর ইনক্রিমেন্টসহ যা তোলা হয়েছে)।</span>
+        </div>
+        <div class="field">
+          <div class="row2">
+            <div><span class="sub">বাড়ি ভাড়ার হার (%)</span><input type="text" class="money" data-key="hrRate" inputmode="decimal"></div>
+            <div><span class="sub">গৃহীত বিশেষ সুবিধার হার (%)</span><input type="text" class="money" data-key="sbRate" inputmode="decimal"></div>
+          </div>
+          <span class="hint">বাড়ি ভাড়া: প্রাপ্য ৩০ জুন ২০২৬-এর মূল বেতনে, গৃহীত তোলা মূল বেতনে (৩১ ডিসেম্বর ২০২৭ পর্যন্ত)। বিশেষ সুবিধা ১ জুলাই ২০২৬ থেকে বিলুপ্ত, তাই তোলা অংশ পুরোটা সমন্বয় হয় — না তুলে থাকলে ০ দিন।</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>বকেয়ার সময়কাল</legend>
+        <div class="field">
+          <div class="row2">
+            <div><span class="sub">যে মাস থেকে</span><select data-key="fromM" id="fromM"></select></div>
+            <div><span class="sub">যে মাস পর্যন্ত</span><select data-key="toM" id="toM"></select></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="prepDate">প্রস্তুতের তারিখ</label>
+          <input type="text" id="prepDate" data-key="prepDate">
+        </div>
+      </fieldset>
+    </form>
+  </aside>
+
+  <!-- ===================== PRINT PREVIEW ===================== -->
+  <main class="preview">
+    <div class="sheet-wrap" id="sheetWrap">
+      <div class="sheet" id="sheet">
+        <div class="sheet-inner" id="sheetInner">
+          <h2 class="doc-title">জাতীয় বেতনস্কেল ২০২৬ – বকেয়া বিল বিবরণী</h2>
+          <div class="info" id="pInfo"></div>
+          <div class="summary">
+            <div><div class="s-label" id="pSumLabel"></div><div class="s-range" id="pSumRange"></div></div>
+            <div class="s-amt" id="pSumAmt"></div>
+          </div>
+
+          <h3 class="sec">১. নতুন মূল বেতন নির্ধারণ</h3>
+          <ol class="steps" id="pSteps"></ol>
+
+          <h3 class="sec">২. মাসিক বকেয়া হিসাব</h3>
+          <div id="pMonthly"></div>
+
+          <h3 class="sec">৩. মোট বকেয়া</h3>
+          <table class="grid months" id="pMonths"></table>
+          <div class="grand" id="pGrand"></div>
+
+          <div class="signs"><div>প্রস্তুতকারী</div><div>হিসাব রক্ষণ কর্মকর্তা</div><div>ড্রয়িং ও ডিসবার্সিং অফিসার</div></div>
+          <div class="prep" id="pPrep"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var BN = '০১২৩৪৫৬৭৮৯';
+  var MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  var STORE_KEY = 'betonArrear2026.v1';
+  var PAYFIX_KEY = 'betonNirdharoni2026.v1';   // the বেতন নির্ধারণী বিবরণী page's saved form
+  var DEFAULTS = { office: 'সীতাকুণ্ড পৌরসভা', hrRate: '45', sbRate: '15' };
+  // month index k = (year − 2026) × 12 + month; arrears run from জুলাই ২০২৬ (6) to ডিসেম্বর ২০২৭ (23),
+  // the period for which বাড়ি ভাড়া stays on the 30 June 2026 basic (অনুচ্ছেদ ১৫)
+  var K_FIRST = 6, K_LAST = 23;
+
+  // Basic pay scales from S.R.O. নং-৩৪৭-আইন/২০২৬ (same tables as the বেতন নির্ধারণী page)
+  var SCALE_2015 = [
+    [78000],
+    [66000,68480,71050,73720,76490],
+    [56500,58760,61120,63570,66120,68770,71530,74400],
+    [50000,52000,54080,56250,58500,60840,63280,65820,68460,71200],
+    [43000,44940,46970,49090,51300,53610,56030,58560,61200,63960,66840,69850],
+    [35500,37280,39150,41110,43170,45330,47600,49980,52480,55110,57870,60770,63810,67010],
+    [29000,30450,31980,33580,35260,37030,38890,40840,42890,45040,47300,49670,52160,54770,57510,60390,63410],
+    [23000,24150,25360,26630,27970,29370,30840,32390,34010,35720,37510,39390,41360,43430,45610,47900,50300,52820,55470],
+    [22000,23100,24260,25480,26760,28100,29510,30990,32540,34170,35880,37680,39570,41550,43630,45820,48120,50530,53060],
+    [16000,16800,17640,18530,19460,20440,21470,22550,23680,24870,26120,27430,28810,30260,31780,33370,35040,36800,38640],
+    [12500,13130,13790,14480,15210,15980,16780,17620,18510,19440,20420,21450,22530,23660,24850,26100,27410,28790,30230],
+    [11300,11870,12470,13100,13760,14450,15180,15940,16740,17580,18460,19390,20360,21380,22450,23580,24760,26000,27300],
+    [11000,11550,12130,12740,13380,14050,14760,15500,16280,17100,17960,18860,19810,20810,21860,22960,24110,25320,26590],
+    [10200,10710,11250,11820,12420,13050,13710,14400,15120,15880,16680,17520,18400,19320,20290,21310,22380,23500,24680],
+    [9700,10190,10700,11240,11810,12410,13040,13700,14390,15110,15870,16670,17510,18390,19310,20280,21300,22370,23490],
+    [9300,9770,10260,10780,11320,11890,12490,13120,13780,14470,15200,15960,16760,17600,18480,19410,20390,21410,22490],
+    [9000,9450,9930,10430,10960,11510,12090,12700,13340,14010,14720,15460,16240,17060,17920,18820,19770,20760,21800],
+    [8800,9240,9710,10200,10710,11250,11820,12420,13050,13710,14400,15120,15880,16680,17520,18400,19320,20290,21310],
+    [8500,8930,9380,9850,10350,10870,11420,12000,12600,13230,13900,14600,15330,16100,16910,17760,18650,19590,20570],
+    [8250,8670,9110,9570,10050,10560,11090,11650,12240,12860,13510,14190,14900,15650,16440,17270,18140,19050,20010]
+  ];
+  var SCALE_2026 = [
+    [156000],
+    [132000,135700,139400,143200,147200,151200,153000],
+    [113000,117000,121100,125300,129700,134300,139000,143800,148800],
+    [100000,103500,107200,110900,114800,118800,123000,127300,131700,136300,142400],
+    [86000,89500,93100,96800,100700,104700,108900,113200,117700,122500,127400,132400,139700],
+    [71000,74600,78300,82200,86400,90700,95200,100000,104900,110200,115700,121500,127600,134000],
+    [58000,60900,64000,67200,70500,74100,77800,81700,85700,90000,94500,99200,104200,109400,114900,120600,126800],
+    [46000,48300,50800,53300,56000,58800,61700,64800,68000,71400,75000,78700,82700,86800,91100,95700,100500,105500,110800],
+    [44000,46200,48600,51000,53500,56200,59000,62000,65100,68300,71700,75300,79100,83000,87200,91500,96100,100900,105900],
+    [32000,33600,35300,37100,38900,40900,42900,45100,47300,49700,52200,54800,57500,60400,63400,66600,69900,73400,77300],
+    [25000,26300,27600,29000,30400,32000,33600,35200,37000,38800,40800,42800,44900,47200,49500,52000,54600,57300,60500],
+    [24300,25600,26800,28200,29600,31100,32600,34200,36000,37700,39600,41600,43700,45900,48200,50600,53100,55700,58700],
+    [24000,25200,26500,27800,29200,30700,32200,33800,35500,37300,39100,41100,43200,45300,47600,49900,52400,55100,58000],
+    [23500,24700,26000,27300,28600,30000,31500,33100,34800,36500,38300,40200,42300,44400,46600,48900,51300,53900,56800],
+    [22800,24000,25200,26400,27800,29100,30600,32100,33700,35400,37200,39000,41000,43000,45200,47400,49800,52300,55200],
+    [21900,23000,24200,25400,26700,28000,29400,30900,32400,34000,35700,37500,39400,41300,43400,45600,47900,50200,52900],
+    [21400,22500,23600,24800,26100,27400,28700,30200,31700,33200,34900,36700,38500,40400,42400,44500,46800,49100,51900],
+    [21000,22100,23200,24400,25600,26900,28200,29600,31100,32600,34300,36000,37800,39600,41600,43700,45900,48200,50900],
+    [20500,21600,22700,23800,25000,26200,27500,28900,30300,31900,33400,35100,36900,38700,40600,42700,44800,47000,49600],
+    [20000,21000,22100,23200,24400,25600,26900,28200,29600,31100,32600,34300,36000,37800,39600,41600,43700,45900,48400]
+  ];
+
+  function stepAtOrAbove(steps, x) {
+    if (!steps || x == null) return { v: null, capped: false };
+    for (var i = 0; i < steps.length; i++) if (steps[i] >= x) return { v: steps[i], capped: false };
+    return { v: steps[steps.length - 1], capped: true };
+  }
+  function nextStep(steps, x) {
+    if (!steps || x == null) return { v: null, capped: false };
+    for (var i = 0; i < steps.length; i++) if (steps[i] > x) return { v: steps[i], capped: false };
+    return { v: steps[steps.length - 1], capped: true };
+  }
+
+  function toBn(s) { return String(s).replace(/[0-9]/g, function (d) { return BN[d]; }); }
+  function toEn(s) { return String(s).replace(/[০-৯]/g, function (d) { return BN.indexOf(d); }); }
+  function parseNum(v) {
+    if (v == null) return null;
+    var s = toEn(String(v)).replace(/[,\s৳%]/g, '').replace(/টাকা/g, '');
+    if (s === '' || s === '-' || s === '.') return null;
+    var n = Number(s);
+    return isFinite(n) ? n : null;
+  }
+  function r2(n) { return Math.round((n + (n >= 0 ? 1 : -1) * Number.EPSILON) * 100) / 100; }
+  // taka without paisa unless there is any; negatives with a real minus sign
+  function tk(n) {
+    if (n == null || !isFinite(n)) return '';
+    var a = Math.abs(n), whole = Math.round(a * 100) % 100 === 0;
+    var s = toBn(a.toLocaleString('en-IN', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: whole ? 0 : 2 }));
+    return (n < 0 ? '−' : '') + s;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function monthName(k) { return MONTHS[k % 12] + ' ' + toBn(2026 + Math.floor(k / 12)); }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var inputs = {};
+  Array.prototype.forEach.call(document.querySelectorAll('[data-key]'), function (el) { inputs[el.dataset.key] = el; });
+
+  // dropdowns
+  (function () {
+    var o = '<option value="">— গ্রেড নির্বাচন করুন —</option>';
+    for (var g = 1; g <= 20; g++) o += '<option value="' + g + '">গ্রেড ' + toBn(g) + '</option>';
+    inputs.grade.innerHTML = o;
+    var m = '';
+    for (var k = K_FIRST; k <= K_LAST; k++) m += '<option value="' + k + '">' + monthName(k) + '</option>';
+    inputs.fromM.innerHTML = m;
+    inputs.toM.innerHTML = m;
+  })();
+
+  // ---------- storage ----------
+  function save() {
+    try {
+      var values = {};
+      Object.keys(inputs).forEach(function (k) { values[k] = inputs[k].value; });
+      localStorage.setItem(STORE_KEY, JSON.stringify(values));
+    } catch (e) { /* storage unavailable */ }
+  }
+  function todayBn() {
+    var d = new Date();
+    return toBn(d.getDate()) + ' ' + MONTHS[d.getMonth()] + ' ' + toBn(d.getFullYear());
+  }
+  function clampK(k) { return Math.max(K_FIRST, Math.min(K_LAST, k)); }
+  function setDefaults(values) {
+    var now = new Date();
+    // by default the arrear runs up to the month before this one
+    var kPrev = clampK((now.getFullYear() - 2026) * 12 + now.getMonth() - 1);
+    Object.keys(inputs).forEach(function (k) {
+      if (values && k in values) inputs[k].value = values[k];
+      else if (k in DEFAULTS) inputs[k].value = DEFAULTS[k];
+      else if (k === 'fromM') inputs[k].value = String(K_FIRST);
+      else if (k === 'toM') inputs[k].value = String(kPrev);
+      else if (k === 'prepDate') inputs[k].value = todayBn();
+      else inputs[k].value = '';
+    });
+  }
+  function load() {
+    var values = null;
+    try { values = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { values = null; }
+    setDefaults(values);
+  }
+
+  // ---------- calculation (same rules as the বেতন নির্ধারণী বিবরণী, items ৮–২৩) ----------
+  function compute() {
+    var g = parseInt(inputs.grade.value, 10);
+    if (!(g >= 1 && g <= 20)) g = null;
+    var b7 = parseNum(inputs.b7.value);
+    var r = { g: g, b7: b7, ok: g != null && b7 != null, warn: '' };
+    var s15 = g == null ? null : SCALE_2015[g - 1];
+    var s26 = g == null ? null : SCALE_2026[g - 1];
+    r.s15 = s15;
+    if (g == null && b7 != null) r.warn = 'বেতন গ্রেড নির্বাচন করুন।';
+    else if (s15 && b7 != null && s15.indexOf(b7) < 0) r.warn = 'এই অঙ্কটি ২০১৫ স্কেলের গ্রেড-' + toBn(g) + ' এর কোনো ধাপের সাথে মেলেনি — যাচাই করুন।';
+    if (!r.ok) return r;
+
+    r.p1 = g >= 10 ? 0.50 : 0.40;
+    r.p2 = g >= 10 ? 0.25 : 0.30;
+    r.c8 = s15[0];
+    r.c9 = r2(b7 - r.c8);
+    r.c10 = s26[0];
+    r.c11 = r2(r.c10 + r.c9);
+    r.c12 = stepAtOrAbove(s26, r.c11).v;
+    r.c13 = nextStep(s26, r.c12).v;
+    r.inc = r2(r.c13 - r.c12);
+    r.c15 = r2(r.c12 - b7);
+    r.c16 = r2(r.c15 * r.p1);
+    r.c17 = r2(b7 + r.c16);
+    r.c18 = r2(r.c17 + r.inc);
+    r.c19 = r2(r.c15 * r.p2);
+    r.c20 = r2(r.c18 + r.c19);
+    r.c22 = r2(r.c20 + r.c19);
+    r.c23 = nextStep(s26, r.c22).v;
+
+    var drawn = parseNum(inputs.drawn.value);
+    r.drawn = drawn != null ? drawn : nextStep(s15, b7).v;
+    var hr = parseNum(inputs.hrRate.value) || 0, sb = parseNum(inputs.sbRate.value) || 0;
+    r.hr = hr; r.sb = sb;
+    r.hrDue = Math.round(b7 * hr / 100);
+    r.hrDrawn = Math.round(r.drawn * hr / 100);
+    r.sbDrawn = Math.round(r.drawn * sb / 100);
+    return r;
+  }
+  // entitled basic for month k: ১৮ নং till Dec 2026, ২০ নং till Jun 2027, then ২৩ নং
+  function periodOf(k) { return k <= 11 ? 0 : (k <= 17 ? 1 : 2); }
+  var PERIODS = [
+    { from: 6, to: 11, key: 'c18' },
+    { from: 12, to: 17, key: 'c20' },
+    { from: 18, to: 23, key: 'c23' }
+  ];
+  function monthly(r, p) {
+    var due = r[PERIODS[p].key];
+    var basic = r2(due - r.drawn), hr = r.hrDue - r.hrDrawn, sb = -r.sbDrawn;
+    return { due: due, basic: basic, hr: hr, sb: sb, total: r2(basic + hr + sb) };
+  }
+
+  // ---------- render ----------
+  function cell(n) { return '<td class="num' + (n < 0 ? ' neg' : '') + '">' + tk(n) + '</td>'; }
+
+  function render() {
+    var r = compute();
+    var val = function (k) { return inputs[k].value.trim(); };
+    $('warnB7').textContent = r.warn;
+    var dl = $('steps2015'), dlKey = r.g == null ? '' : String(r.g);
+    if (dl.dataset.grade !== dlKey) {
+      dl.dataset.grade = dlKey;
+      dl.innerHTML = (r.s15 || []).map(function (n) { return '<option value="' + n + '">' + tk(n) + '</option>'; }).join('');
+    }
+    inputs.drawn.placeholder = r.ok ? toEn(tk(r.drawn)) + ' (স্বয়ংক্রিয়)' : '';
+
+    var info = [['নাম', val('name')], ['পদবি', val('desig')], ['অফিস', val('office')], ['এনআইডি', toBn(val('nid'))],
+      ['গ্রেড', r.g == null ? '' : toBn(r.g)]];
+    $('pInfo').innerHTML = info.map(function (x) {
+      return '<b>' + x[0] + ':</b> ' + esc(x[1] || '..........');
+    }).join('<span class="sep">|</span>');
+
+    var kFrom = parseInt(inputs.fromM.value, 10), kTo = parseInt(inputs.toM.value, 10);
+    if (kTo < kFrom) { var t = kFrom; kFrom = kTo; kTo = t; }
+    var nMonths = kTo - kFrom + 1;
+    $('pSumLabel').textContent = 'সর্বমোট বকেয়া (' + toBn(nMonths) + ' মাস)';
+    $('pSumRange').textContent = monthName(kFrom) + ' থেকে ' + monthName(kTo);
+    $('pPrep').textContent = 'প্রস্তুতের তারিখ: ' + val('prepDate');
+
+    if (!r.ok) {
+      var need = '<li>বেতন গ্রেড ও ৩০ জুন ২০২৬ তারিখের মূল বেতন দিন — বাকি হিসাব নিজে থেকে হবে।</li>';
+      $('pSteps').innerHTML = need;
+      $('pMonthly').innerHTML = '';
+      $('pMonths').innerHTML = '';
+      $('pGrand').textContent = '';
+      $('pSumAmt').textContent = '৳ —';
+      fitFont(); fitPreview();
+      return;
+    }
+
+    var B = function (n, sign) { return '<b>' + (sign ? '৳ ' : '') + tk(n) + '</b>'; };
+    var pc = function (p) { return toBn(Math.round(p * 100)) + '%'; };
+    $('pSteps').innerHTML = [
+      'বর্তমান বেতন − পুরাতন প্রারম্ভিক ধাপ = ' + tk(r.b7) + ' − ' + tk(r.c8) + ' = ' + B(r.c9),
+      'নতুন প্রারম্ভিক ধাপ + পার্থক্য = ' + tk(r.c10) + ' + ' + tk(r.c9) + ' = ' + B(r.c11),
+      (r.c12 === r.c11 ? 'সমান ধাপ আছে: ' : 'সমান ধাপ নেই, পরবর্তী উচ্চতর ধাপ: ') + B(r.c12, true),
+      '১ জুলাই ২০২৬-এর বার্ষিক বেতনবৃদ্ধিসহ পূর্ণ নতুন মূল বেতন: ' + B(r.c13, true),
+      'বেতন বৃদ্ধির পরিমাণ = ' + tk(r.c12) + ' − ' + tk(r.b7) + ' = ' + tk(r.c15) + '; ' + pc(r.p1) + ' = ' + tk(r.c16) +
+        '; প্রাপ্য বেতন = ' + tk(r.b7) + ' + ' + tk(r.c16) + ' = ' + tk(r.c17) +
+        '; ইনক্রিমেন্ট সহ (জুলাই–ডিসেম্বর ২০২৬): + ' + tk(r.inc) + ' = ' + B(r.c18, true),
+      '১ জানুয়ারি ২০২৭: পরবর্তী ' + pc(r.p2) + ' (' + tk(r.c19) + ') যোগে ' + B(r.c20, true) +
+        '; ১ জুলাই ২০২৭: পূর্ণ ' + B(r.c22, true) + '; ১ জুলাই ২০২৭-এর ইনক্রিমেন্ট সহ ' + B(r.c23, true)
+    ].map(function (s) { return '<li>' + s + '</li>'; }).join('');
+
+    // one per-month table for each pay period the arrear touches
+    var used = PERIODS.map(function (p, i) { return i; }).filter(function (i) {
+      return PERIODS[i].to >= kFrom && PERIODS[i].from <= kTo;
+    });
+    $('pMonthly').innerHTML = used.map(function (i, n) {
+      var m = monthly(r, i);
+      // the explanatory notes only on the first table; later ones repeat the same rule
+      var note = function (s) { return n === 0 ? '<span class="small">' + s + '</span>' : ''; };
+      var a = Math.max(kFrom, PERIODS[i].from), b = Math.min(kTo, PERIODS[i].to);
+      var cap = used.length > 1
+        ? 'প্রতি মাসের হিসাব — ' + (a === b ? monthName(a) : MONTHS[a % 12] + '–' + monthName(b))
+        : 'প্রতি মাসের হিসাব';
+      return '<div class="cap">' + cap + '</div>' +
+        '<table class="grid"><colgroup><col><col style="width:22%"><col style="width:18%"><col style="width:18%"></colgroup>' +
+        '<tr><th>বিবরণ</th><th class="num">প্রাপ্য</th><th class="num">গৃহীত</th><th class="num">সমন্বয়</th></tr>' +
+        '<tr><td>মূল বেতন</td>' + cell(m.due) + cell(r.drawn) + cell(m.basic) + '</tr>' +
+        '<tr><td>বাড়ি ভাড়া (' + toBn(r.hr) + '%)' + note('প্রাপ্য: ৩০ জুনের মূল বেতনে; গৃহীত: তোলা মূল বেতনে') + '</td>' +
+          cell(r.hrDue) + cell(r.hrDrawn) + cell(m.hr) + '</tr>' +
+        '<tr><td>বিশেষ সুবিধা (' + toBn(r.sb) + '%)' + note('১ জুলাই ২০২৬ থেকে বিলুপ্ত') + '</td>' +
+          cell(0) + cell(r.sbDrawn) + cell(m.sb) + '</tr>' +
+        '<tr class="total"><td colspan="3">মাসিক বকেয়া</td>' + cell(m.total) + '</tr></table>';
+    }).join('');
+
+    var total = 0, list = [];
+    for (var k = kFrom; k <= kTo; k++) {
+      var mt = monthly(r, periodOf(k)).total;
+      total = r2(total + mt);
+      list.push('<td>' + monthName(k) + '</td>' + cell(mt));
+    }
+    // more than six months: two side-by-side columns so a long arrear still fits one page
+    var rows = '', half = list.length > 6 ? Math.ceil(list.length / 2) : list.length;
+    for (var j = 0; j < half; j++) {
+      rows += '<tr>' + list[j] + (half < list.length ? (list[j + half] || '<td></td><td></td>') : '') + '</tr>';
+    }
+    var head = '<th>মাস</th><th class="num">মাসিক বকেয়া</th>';
+    $('pMonths').classList.toggle('two', half < list.length);
+    $('pMonths').innerHTML = '<tr>' + head + (half < list.length ? head : '') + '</tr>' + rows;
+    $('pGrand').textContent = 'সর্বমোট বকেয়া (' + toBn(nMonths) + ' মাস): ৳ ' + tk(total);
+    $('pSumAmt').textContent = '৳ ' + tk(total);
+
+    fitFont();
+    fitPreview();
+  }
+
+  // Shrink the sheet font until everything fits on one A4 page.
+  function fitFont() {
+    var inner = $('sheetInner');
+    var fs = 10.5;
+    inner.style.setProperty('--fs', fs + 'pt');
+    while (inner.scrollHeight > inner.clientHeight + 1 && fs > 7.5) {
+      fs -= 0.25;
+      inner.style.setProperty('--fs', fs + 'pt');
+    }
+    $('sheet').classList.toggle('overflow', inner.scrollHeight > inner.clientHeight + 1);
+  }
+  // Scale the on-screen sheet down to fit narrow screens (print is unaffected).
+  function fitPreview() {
+    var wrap = $('sheetWrap'), sheet = $('sheet');
+    var preview = wrap.parentElement;
+    var cs = getComputedStyle(preview);
+    var avail = preview.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var w = sheet.offsetWidth, h = sheet.offsetHeight;
+    var s = Math.min(1, avail / w);
+    sheet.style.transform = s < 1 ? 'scale(' + s + ')' : '';
+    wrap.style.width = (w * s) + 'px';
+    wrap.style.height = (h * s) + 'px';
+  }
+
+  function msg(s, isErr) {
+    $('msg').textContent = s;
+    $('msg').classList.toggle('err', !!isErr);
+  }
+
+  // ---------- events ----------
+  $('form').addEventListener('input', function () { render(); save(); });
+  $('form').addEventListener('change', function () { render(); save(); });
+  $('btnPrint').addEventListener('click', function () { render(); window.print(); });
+  $('btnImport').addEventListener('click', function () {
+    var d = null;
+    try { d = JSON.parse(localStorage.getItem(PAYFIX_KEY) || 'null'); } catch (e) { d = null; }
+    var v = d && d.values;
+    if (!v || !(v.name || v.b7 || v.grade)) {
+      msg('বেতন নির্ধারণী বিবরণীতে কোনো কর্মকর্তা/কর্মচারীর তথ্য পাওয়া যায়নি। আগে সেখানে তথ্য দিন (একই ব্রাউজারে)।', true);
+      return;
+    }
+    ['name', 'desig', 'nid', 'grade', 'b7'].forEach(function (k) { inputs[k].value = v[k] || ''; });
+    if ((v.office || '').trim()) inputs.office.value = v.office;
+    inputs.drawn.value = '';
+    render();
+    save();
+    var hasOv = d.overrides && Object.keys(d.overrides).length > 0;
+    msg((v.name ? v.name + '-এর ' : '') + 'তথ্য আনা হয়েছে।' +
+      (hasOv ? ' বেতন নির্ধারণীতে হাতে বসানো মান এখানে আসে না — প্রয়োজনে মিলিয়ে নিন।' : ''), false);
+  });
+  $('btnClear').addEventListener('click', function () {
+    if (!window.confirm('বকেয়া বিলের সব তথ্য মুছে ফেলতে চান?')) return;
+    setDefaults(null);
+    msg('');
+    render();
+    save();
+  });
+  window.addEventListener('resize', fitPreview);
+
+  load();
+  render();
+  // re-fit once the Bengali web font has loaded (glyph metrics change)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { render(); });
+  }
+})();
+</script>
+</body>
+</html>
